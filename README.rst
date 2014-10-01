@@ -13,6 +13,10 @@ Installation:
 
     ./manage.py syncdb
 
+    or if you use South:
+
+    ./manage.py migrate seo
+
 Usage:
 ======
 

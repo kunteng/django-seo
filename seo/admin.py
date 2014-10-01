@@ -12,7 +12,8 @@ class SeoInlines(generic.GenericStackedInline):
     model = Seo
     form = SeoForm
     extra = 1
-    max_num = 1
+    ## no longer limited to 1 as you can create them for several languages
+    # max_num = 1 
 
 class SeoAdmin(admin.ModelAdmin):
     model = Seo

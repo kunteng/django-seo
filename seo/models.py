@@ -4,12 +4,13 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.conf.global_settings import LANGUAGES
 
 class Seo(models.Model):
     class Meta:
         verbose_name = _('SEO fields')
         verbose_name_plural = _('SEO fields')
-        unique_together = (("content_type", "object_id"),)
+        unique_together = (("content_type", "object_id", "language"),)
 
     title = models.CharField(verbose_name=_('Title'),
         max_length=200, default='', blank=True)
@@ -21,6 +22,12 @@ class Seo(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
+
+    ## Quentin MOD
+    language = models.CharField(verbose_name=_('Language'),
+        max_length=2, choices=LANGUAGES, default="fr")
+    slug_url = models.CharField(verbose_name=_('Slug URL (that should be used for the object page URL)'),
+        max_length=200, default='', blank=True)
 
     def __unicode__(self):
         return self.title

@@ -3,6 +3,7 @@ from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Model
 from django.utils.html import escape
+from django.utils import translation
 from seo.models import Seo, Url
 import warnings
 
@@ -26,6 +27,7 @@ class SeoNode(template.Node):
     def _seo_by_url(self, context):
         try:
             request = context['request']
+            language = translation.get_language_from_request(request)
         except KeyError:
             warnings.warn('`request` was not found in context. Add "django.core.context_processors.request" to `TEMPLATE_CONTEXT_PROCESSORS` in your settings.py.')
             return self._process_var_argument(context, None)
@@ -39,13 +41,19 @@ class SeoNode(template.Node):
                     seo = Seo.objects.get(
                         content_type=ContentType.objects.get_for_model(
                                 object.__class__),
-                        object_id=object.id)
+                        object_id=object.id,
+                        language=language)
                 except Seo.DoesNotExist:
                     return self._process_var_argument(context, None)
                 else:
                     return self._process_var_argument(context, seo)
 
     def _seo_by_content_object(self, context):
+        try:
+            request = context['request']
+            language = translation.get_language_from_request(request)
+        except KeyError:
+            warnings.warn('`request` was not found in context. Add "django.core.context_processors.request" to `TEMPLATE_CONTEXT_PROCESSORS` in your settings.py.')
         object = template.Variable(self.object).resolve(context)
         if not isinstance(object, Model):
             return self._process_var_argument(context, None)
@@ -54,7 +62,8 @@ class SeoNode(template.Node):
             seo = Seo.objects.get(
                 content_type=ContentType.objects.get_for_model(
                         object.__class__),
-                object_id=object.id)
+                object_id=object.id,
+                language=language)
         except Seo.DoesNotExist:
             return self._seo_by_url(context)
         else:
